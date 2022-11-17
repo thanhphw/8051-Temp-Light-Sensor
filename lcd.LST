@@ -1,0 +1,113 @@
+C51 COMPILER V9.01   LCD                                                                   11/17/2022 21:21:11 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE LCD
+OBJECT MODULE PLACED IN lcd.OBJ
+COMPILER INVOKED BY: E:\keil4\C51\BIN\C51.EXE lcd.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include "lcd.h"
+   2          #include <REGX52.H>
+   3          
+   4          sbit LCD_RS = P0^0;                                  
+   5          sbit LCD_RW = P0^1;                                 
+   6          sbit LCD_EN = P0^2;                                  
+   7          sbit LCD_D4 = P0^4;
+   8          sbit LCD_D5 = P0^5;                                  
+   9          sbit LCD_D6 = P0^6;
+  10          sbit LCD_D7 = P0^7;
+  11          
+  12          void delay_us(int time){
+  13   1              while (time--);
+  14   1      }
+  15          
+  16          void delay_ms(unsigned int t){
+  17   1              unsigned int i,j;
+  18   1              for(i=0;i<t;i++)
+  19   1              for(j=0;j<123;j++);
+  20   1      }
+  21          
+  22          void LCD_Enable(){
+  23   1              LCD_EN =1;
+  24   1              delay_us(3);                                              
+  25   1              LCD_EN=0;
+  26   1              delay_us(50);
+  27   1      }
+  28          
+  29          void LCD_Send4Bit(unsigned char Data){     
+  30   1              LCD_D4=Data & 0x01;                                  //Data chuyen thanh: 0110 1101 & 0000 0001 => D4 = 1
+  31   1              LCD_D5=(Data>>1)&1;                                //Data chuyen thanh: 1011 0110 & 0000 0001 => D5 = 0
+  32   1              LCD_D6=(Data>>2)&1;                                //Data chuyen thanh: 0101 1011 & 0000 0001 => D6 = 1
+  33   1              LCD_D7=(Data>>3)&1;                                //Data chuyen thanh: 1010 1101 & 0000 0001 => D7 = 1
+  34   1      }
+  35          
+  36          void LCD_SendCommand(unsigned char command){
+  37   1              LCD_Send4Bit(command >>4);                    //Gui 4 bit cao truoc
+  38   1              LCD_Enable(); //chot LCD
+  39   1              LCD_Send4Bit(command);                            //Gui 4 bit thap sau
+  40   1              LCD_Enable(); //chot LCD
+  41   1      }
+  42          
+  43          void LCD_Clear(){
+  44   1              LCD_SendCommand(0x01);                          //command =1 là xoa man hinh
+  45   1              delay_us(10);
+  46   1      }
+  47          
+  48          void LCD_Init(){ //khoi tao LCD
+  49   1              LCD_Send4Bit(0x00);                                    //goi hàm, D4=0x00=D5=D6=D7
+  50   1              delay_ms(20);
+  51   1              LCD_RS=0;                                                   //Dua Command
+  52   1              LCD_RW=0;                                                 //Cho phép ghi lên màn hình
+  53   1              LCD_Send4Bit(0x03);
+  54   1              LCD_Enable();                                              //Chot màn hình EN
+  55   1              delay_ms(5);
+C51 COMPILER V9.01   LCD                                                                   11/17/2022 21:21:11 PAGE 2   
+
+  56   1              LCD_Enable();
+  57   1              delay_us(100);
+  58   1              LCD_Enable();
+  59   1              LCD_Send4Bit(0x02);                                  //Che do gui 4 bit
+  60   1              LCD_Enable();
+  61   1              LCD_SendCommand( 0x28 );                     //28:khoi tao 16x2 trong 4 bit mode
+  62   1              LCD_SendCommand( 0x0c);                      //0C:tat con tro và cho phep hien thi
+  63   1              LCD_SendCommand( 0x06 );                     //06:dich con tro qua phai
+  64   1              LCD_SendCommand(0x01);                      //01:xoa man hinh
+  65   1      }
+  66          
+  67          void LCD_Gotoxy(unsigned char x, unsigned char y){
+  68   1              unsigned char address;
+  69   1              if(!y) address=(0x80+x);
+  70   1              else address=(0xc0+x);                              //doan code nay là de chon hang, cot de hien thi data
+  71   1              delay_us(1000);                                          //chon hang 1(80) hoac hang 2(C0)
+  72   1              LCD_SendCommand(address);                  //vi du:(0,0) thi ghi data o hang 1,cot 1
+  73   1              delay_us(50);                                             //(0,1) thi ghi data o hang 2 cot 1
+  74   1      }
+  75           
+  76          /*Gui ky tu*/
+  77          void LCD_PutChar(unsigned char Data){
+  78   1              LCD_RS=1;                                                  //cho phép ghi d? li?u
+  79   1              LCD_SendCommand(Data);                        //gui data hoac command
+  80   1              LCD_RS=0 ;
+  81   1      }
+  82          void LCD_Puts(char *s){                              //*s là gia tri cua dia chi mà s tro toi
+  83   1              while (*s){
+  84   2              LCD_PutChar(*s);                                        //vi du: du lieu là "Nhiet do,0", khi nào gui het
+             - thi s=0
+  85   2              s++;                                                           //Tang dia chi len 1 don vi
+  86   2              }
+  87   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    250    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

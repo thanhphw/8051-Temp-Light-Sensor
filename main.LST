@@ -1,0 +1,107 @@
+C51 COMPILER V9.01   MAIN                                                                  11/17/2022 21:21:11 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: E:\keil4\C51\BIN\C51.EXE main.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include <REGX52.H>
+   2          #include <math.h>
+   3          #include "lcd.h"
+   4          #include "adc_0808.h"
+   5          
+   6          
+   7          void TempShow(unsigned char temp){
+   8   1              delay_us(1000);
+   9   1              LCD_PutChar(temp/100+0x30);
+  10   1              LCD_PutChar(temp%100/10+0x30);                    
+  11   1              LCD_PutChar(temp%100%10+0x30);
+  12   1      }
+  13          
+  14          void VoltShow(unsigned char temp){
+  15   1              unsigned char te = temp;
+  16   1              int a = (int)te * 19.61f ;
+  17   1              int b = a/1000;
+  18   1              int c = a%1000/100;
+  19   1              int d = a%1000%100/10;
+  20   1              int e = a%1000%100%10;
+  21   1              unsigned char b1 = b;
+  22   1              unsigned char c1 = c;
+  23   1              unsigned char d1 = d;
+  24   1              unsigned char e1 = e;
+  25   1              LCD_Gotoxy(0,1);
+  26   1              delay_us(1000);
+  27   1              LCD_PutChar(b1+0x30);
+  28   1              LCD_PutChar(c1+0x30);
+  29   1              LCD_PutChar(d1+0x30);
+  30   1              LCD_PutChar(e1+0x30);
+  31   1      }
+  32          
+  33          void NhietShow(unsigned char temp){
+  34   1              unsigned int y = ((100-0)*temp - 139*100 + 0*191) / (191-139); 
+  35   1              if (temp > 165) y++; // hieu chinh sai so vi do phan giai thap hon muc nhiet
+  36   1              delay_us(100);
+  37   1              LCD_Gotoxy(0,0);
+  38   1              LCD_Puts("TEMP: ");
+  39   1              LCD_PutChar(y/100+0x30);
+  40   1              LCD_PutChar(y%100/10+0x30);                    
+  41   1              LCD_PutChar(y%100%10+0x30);
+  42   1      }
+  43          
+  44          void QuangShow(unsigned char temp){
+  45   1              float vol = temp * 5.0 / 255.0;
+  46   1              float R2 = (vol*10000)/(5.0-vol);
+  47   1              float E2 = pow((18000/R2),1.0/0.9)*10;
+  48   1              unsigned int y = E2;
+  49   1              delay_us(100);
+  50   1              LCD_Gotoxy(0,1);
+  51   1              LCD_Puts("LIGHT: ");
+  52   1              LCD_PutChar(y/100+0x30);
+  53   1              LCD_PutChar(y%100/10+0x30);                    
+  54   1              LCD_PutChar(y%100%10+0x30);
+  55   1      }
+C51 COMPILER V9.01   MAIN                                                                  11/17/2022 21:21:11 PAGE 2   
+
+  56          // chanel 1: temperature
+  57          // chanel 2: light sensor
+  58          void main(){    
+  59   1              unsigned char temp;
+  60   1              LCD_Init();
+  61   1              ADC0808_Init();
+  62   1              temp = ADC0808_Read(1); 
+  63   1              delay_ms(250);
+  64   1              LCD_Clear();
+  65   1              NhietShow(temp);
+  66   1              ADC0808_Init();
+  67   1              temp = ADC0808_Read(2);
+  68   1              QuangShow(temp);
+  69   1              delay_ms(2000);
+  70   1              
+  71   1              while (1){              
+  72   2                      temp = ADC0808_Read(1); 
+  73   2                      delay_ms(50);
+  74   2                      LCD_Clear();
+  75   2                      NhietShow(temp);
+  76   2      
+  77   2                      ADC0808_Init();
+  78   2                      temp = ADC0808_Read(2);
+  79   2                      QuangShow(temp);
+  80   2                      delay_ms(3000); 
+  81   2              }
+  82   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    733    ----
+   CONSTANT SIZE    =     15    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----      18
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

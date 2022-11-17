@@ -1,0 +1,5 @@
+"main.obj",
+"lcd.obj",
+"adc_0808.obj" 
+TO "Software" 
+RAMSIZE(256) 
